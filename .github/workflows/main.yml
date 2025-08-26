@@ -1,6 +1,5 @@
-name: Run Bun Start
+name: CI
 
-# Trigger the workflow on push to main branch and pull requests
 on:
   push:
     branches: [ main ]
@@ -8,20 +7,31 @@ on:
     branches: [ main ]
 
 jobs:
-  run-bun-start:
+  build:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup Bun
-      uses: oven-sh/setup-bun@v2
-      with:
-        bun-version: latest
-        
-    - name: Install dependencies
-      run: bun install
-      
-    - name: Run bun start
-      run: bun start
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --ci
+
+      # Optional: typecheck (uncomment if you add 'typescript' to devDependencies)
+      # - name: Typecheck
+      #   run: bunx tsc --noEmit
+
+      - name: Build
+        run: bun run build
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+          if-no-files-found: error
